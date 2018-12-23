@@ -12,6 +12,7 @@ namespace WWFHelper {
         private readonly Node[] _children;
         private bool _isWord;
         private const int _alphabetOffet = 97;
+        private const char _usedChar = '_';
 
         public Node() {
             this._isWord = false;
@@ -37,7 +38,7 @@ namespace WWFHelper {
             List<string> toReturn = new List<string>();
 
             for (int index = 0; index < letters.Length; index++) {
-                if (letters[index] == '0')
+                if (letters[index] == _usedChar)
                     continue;
 
                 int startIndex, searchLength, count = 0;
@@ -62,7 +63,7 @@ namespace WWFHelper {
                         }
                         // Remove this letter from the remaining letters, restore after call
                         char temp = letters[index];
-                        letters[index] = '0';
+                        letters[index] = _usedChar;
                         foreach (string partialWord in _children[startIndex + count].GetPlayableWordsFromChildren(letters)) {
                             if (temp == '-') // If the tile is free, add markers to show what the free tile should be
                                 toReturn.Add(":" + Convert.ToChar((startIndex + count) + _alphabetOffet) + ":" + partialWord);
@@ -80,17 +81,17 @@ namespace WWFHelper {
 
     class WordsWithFriendsHelper {
         static void Main(string[] args) {
-            string letters = "xie-sga";
-            string possibleplayofftiles = "u";
+            string letters = "qhhvsol";
+            string possiblePlayoffTiles = "g";
 
             Node root = new Node();
-            System.IO.StreamReader file = new System.IO.StreamReader(@"wwf_dict.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader(@"../../wwf_dict.txt");
             string nextLine;
             while ((nextLine = file.ReadLine()) != null)
                 root.Insert(nextLine);
             file.Close();
 
-            char[] tiles = (letters.ToLower() + possibleplayofftiles.ToLower()).ToCharArray();
+            char[] tiles = (letters.ToLower() + possiblePlayoffTiles.ToLower()).ToCharArray();
             List<string> wordsWithoutPlayoffTiles = new List<string>();
             List<string> wordsWithMultiplePlayoffTiles = new List<string>();
 
@@ -102,7 +103,7 @@ namespace WWFHelper {
                     continue; // Don't bother with repeats
 
                 bool containPlayoffTile = false, containsMultiplePlayoffTiles = false;
-                foreach (char element in possibleplayofftiles) {
+                foreach (char element in possiblePlayoffTiles) {
                     if (possibleWord.IndexOf(element) != -1 && containPlayoffTile) {
                         containsMultiplePlayoffTiles = true; // It is unlikely both playoff tiles are aligned correctly
                         break;
