@@ -81,8 +81,6 @@ namespace WWFHelper {
 
     class WordsWithFriendsHelper {
         static void Main(string[] args) {
-            string letters = "qhhvsol";
-            string possiblePlayoffTiles = "g";
 
             Node root = new Node();
             System.IO.StreamReader file = new System.IO.StreamReader(@"../../wwf_dict.txt");
@@ -91,42 +89,54 @@ namespace WWFHelper {
                 root.Insert(nextLine);
             file.Close();
 
-            char[] tiles = (letters.ToLower() + possiblePlayoffTiles.ToLower()).ToCharArray();
-            List<string> wordsWithoutPlayoffTiles = new List<string>();
-            List<string> wordsWithMultiplePlayoffTiles = new List<string>();
+            Console.Write("Enter your tiles: ");
+            string letters = Console.ReadLine();
+            string possiblePlayoffTiles = "";
+            while (true){
+                Console.Write("Enter Possible Playoff Tiles: ");
+                possiblePlayoffTiles = Console.ReadLine();
 
-            // Get all of the possible words, sort them longest to smallest, remove all duplicates
-            List<string> words = root.GetPlayableWordsFromChildren(tiles).OrderBy(x => x.Length * -1).Distinct().ToList();
-            for (int count = 0; count < words.Count; count++) {
-                string possibleWord = words.ElementAt(count);
-                if (count < words.Count - 1 && possibleWord.Equals(words.ElementAt(count + 1)))
-                    continue; // Don't bother with repeats
+                if(possiblePlayoffTiles == "exit")
+                    Environment.Exit(0);
 
-                bool containPlayoffTile = false, containsMultiplePlayoffTiles = false;
-                foreach (char element in possiblePlayoffTiles) {
-                    if (possibleWord.IndexOf(element) != -1 && containPlayoffTile) {
-                        containsMultiplePlayoffTiles = true; // It is unlikely both playoff tiles are aligned correctly
-                        break;
+                char[] tiles = (letters.ToLower() + possiblePlayoffTiles.ToLower()).ToCharArray();
+                List<string> wordsWithoutPlayoffTiles = new List<string>();
+                List<string> wordsWithMultiplePlayoffTiles = new List<string>();
+
+                // Get all of the possible words, sort them longest to smallest, remove all duplicates
+                List<string> words = root.GetPlayableWordsFromChildren(tiles).OrderBy(x => x.Length * -1).Distinct().ToList();
+                for (int count = 0; count < words.Count; count++)
+                {
+                    string possibleWord = words.ElementAt(count);
+                    if (count < words.Count - 1 && possibleWord.Equals(words.ElementAt(count + 1)))
+                        continue; // Don't bother with repeats
+
+                    bool containPlayoffTile = false, containsMultiplePlayoffTiles = false;
+                    foreach (char element in possiblePlayoffTiles)
+                    {
+                        if (possibleWord.IndexOf(element) != -1 && containPlayoffTile)
+                        {
+                            containsMultiplePlayoffTiles = true; // It is unlikely both playoff tiles are aligned correctly
+                            break;
+                        }
+
+                        if (possibleWord.IndexOf(element) != -1) // Words that do not contain playoff tiles
+                            containPlayoffTile = true;
                     }
-
-                    if (possibleWord.IndexOf(element) != -1) // Words that do not contain playoff tiles
-                        containPlayoffTile = true;                
+                    if (!containPlayoffTile)
+                        wordsWithoutPlayoffTiles.Add(possibleWord);
+                    else if (containsMultiplePlayoffTiles)
+                        wordsWithMultiplePlayoffTiles.Add(possibleWord);
+                    else
+                        Console.WriteLine(possibleWord);
                 }
-                if (!containPlayoffTile)
-                    wordsWithoutPlayoffTiles.Add(possibleWord);
-                else if (containsMultiplePlayoffTiles)
-                    wordsWithMultiplePlayoffTiles.Add(possibleWord);
-                else
-                    Console.WriteLine(possibleWord);
+
+                Console.WriteLine("Words Without Playoff Tiles:");
+                Console.WriteLine(String.Join("\n", wordsWithoutPlayoffTiles));
+
+                Console.WriteLine("Words with Multiple Playoff Tiles:");
+                Console.WriteLine(String.Join("\n", wordsWithMultiplePlayoffTiles));
             }
-
-            Console.WriteLine("===Words Without Playoff Tiles===");
-            Console.WriteLine(String.Join("\n", wordsWithoutPlayoffTiles));
-
-            Console.WriteLine("===Words with Multiple Playoff Tiles===");
-            Console.WriteLine(String.Join("\n", wordsWithMultiplePlayoffTiles));
-
-            Console.ReadLine(); // Just pausing terminal so I can read the output
         }
     }
 }
