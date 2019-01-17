@@ -7,19 +7,24 @@ using System.Threading.Tasks;
  * This program gives helpful 'suggestions' for possible moves in Words With Friends.
  */
 
-namespace WWFHelper {
-    class Node {
+namespace WWFHelper
+{
+    class Node
+    {
+
         private readonly Node[] _children;
         private bool _isWord;
         private const int _alphabetOffet = 97;
         private const char _usedChar = '_';
 
-        public Node() {
+        public Node()
+        {
             this._isWord = false;
             this._children = new Node[26];
         }
 
-        public void Insert(string word) {
+        public void Insert(string word)
+        {
             // Get the first char of the string, and see if it exists in the array, if not, make a new node and add it to the array
             char firstLetter = word.ElementAt(0);
             int index = firstLetter - _alphabetOffet;
@@ -34,28 +39,35 @@ namespace WWFHelper {
                 _children[index]._isWord = true;
         }
 
-        public List<string> GetPlayableWordsFromChildren(char[] letters) {
+        public List<string> GetPlayableWordsFromChildren(char[] letters)
+        {
             List<string> toReturn = new List<string>();
 
-            for (int index = 0; index < letters.Length; index++) {
+            for (int index = 0; index < letters.Length; index++)
+            {
                 if (letters[index] == _usedChar)
                     continue;
 
                 int startIndex, searchLength, count = 0;
 
                 // If we are on a free tile, we need to search each of the children for possible letters
-                if (letters[index] == '-') {
+                if (letters[index] == '-')
+                {
                     startIndex = 0;
                     searchLength = 26;
                 }
-                else {
+                else
+                {
                     startIndex = startIndex = letters[index] - _alphabetOffet;
                     searchLength = 1;
                 }
 
-                while (count < searchLength) {
-                    if (_children[startIndex + count] != null) {
-                        if (_children[startIndex + count]._isWord) {
+                while (count < searchLength)
+                {
+                    if (_children[startIndex + count] != null)
+                    {
+                        if (_children[startIndex + count]._isWord)
+                        {
                             if (letters[index] == '-')
                                 toReturn.Add(":" + Convert.ToChar((startIndex + count) + _alphabetOffet) + ":");
                             else
@@ -64,7 +76,8 @@ namespace WWFHelper {
                         // Remove this letter from the remaining letters, restore after call
                         char temp = letters[index];
                         letters[index] = _usedChar;
-                        foreach (string partialWord in _children[startIndex + count].GetPlayableWordsFromChildren(letters)) {
+                        foreach (string partialWord in _children[startIndex + count].GetPlayableWordsFromChildren(letters))
+                        {
                             if (temp == '-') // If the tile is free, add markers to show what the free tile should be
                                 toReturn.Add(":" + Convert.ToChar((startIndex + count) + _alphabetOffet) + ":" + partialWord);
                             else
@@ -79,7 +92,8 @@ namespace WWFHelper {
         }
     }
 
-    class WordsWithFriendsHelper {
+    class WordsWithFriendsHelper
+    {
         static void Main(string[] args) {
 
             Node root = new Node();
@@ -92,7 +106,9 @@ namespace WWFHelper {
             Console.Write("Enter your tiles: ");
             string letters = Console.ReadLine();
             string possiblePlayoffTiles = "";
-            while (true){
+
+            while (true)
+            {
                 Console.Write("Enter Possible Playoff Tiles: ");
                 possiblePlayoffTiles = Console.ReadLine();
 
