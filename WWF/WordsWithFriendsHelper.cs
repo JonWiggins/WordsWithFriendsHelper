@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 /**
  * This program gives helpful 'suggestions' for possible moves in Words With Friends.
  */
@@ -16,6 +15,8 @@ namespace WWFHelper
         private bool _isWord;
         private const int _alphabetOffet = 97;
         private const char _usedChar = '_';
+        private const char _wildcardchar = '-';
+        private const char _wildcardMarker = ':';
 
         public Node()
         {
@@ -51,7 +52,7 @@ namespace WWFHelper
                 int startIndex, searchLength, count = 0;
 
                 // If we are on a free tile, we need to search each of the children for possible letters
-                if (letters[index] == '-')
+                if (letters[index] == _wildcardchar)
                 {
                     startIndex = 0;
                     searchLength = 26;
@@ -68,8 +69,8 @@ namespace WWFHelper
                     {
                         if (_children[startIndex + count]._isWord)
                         {
-                            if (letters[index] == '-')
-                                toReturn.Add(":" + Convert.ToChar((startIndex + count) + _alphabetOffet) + ":");
+                            if (letters[index] == _wildcardchar)
+                                toReturn.Add("" + _wildcardMarker + Convert.ToChar((startIndex + count) + _alphabetOffet) + _wildcardMarker);
                             else
                                 toReturn.Add(letters[index].ToString());
                         }
@@ -78,8 +79,8 @@ namespace WWFHelper
                         letters[index] = _usedChar;
                         foreach (string partialWord in _children[startIndex + count].GetPlayableWordsFromChildren(letters))
                         {
-                            if (temp == '-') // If the tile is free, add markers to show what the free tile should be
-                                toReturn.Add(":" + Convert.ToChar((startIndex + count) + _alphabetOffet) + ":" + partialWord);
+                            if (temp == _wildcardchar) // If the tile is free, add markers to show what the free tile should be
+                                toReturn.Add("" + _wildcardMarker + Convert.ToChar((startIndex + count) + _alphabetOffet) + _wildcardMarker + partialWord);
                             else
                                 toReturn.Add(temp + partialWord);
                         }
@@ -94,6 +95,9 @@ namespace WWFHelper
 
     class WordsWithFriendsHelper
     {
+        private const string _newcommand = "new";
+        private const string _quitcommand = "exit";
+
         static void Main(string[] args) {
 
             Node root = new Node();
@@ -103,16 +107,21 @@ namespace WWFHelper
                 root.Insert(nextLine);
             file.Close();
 
-            Console.Write("Enter your tiles: ");
-            string letters = Console.ReadLine();
-            string possiblePlayoffTiles = "";
+            string letters = GetTiles();
+            string possiblePlayoffTiles;
 
-            while (true)
+            for( ; ; )
             {
-                Console.Write("Enter Possible Playoff Tiles: ");
-                possiblePlayoffTiles = Console.ReadLine();
+                possiblePlayoffTiles = GetPossiblePlayoffTiles();
 
-                if(possiblePlayoffTiles == "exit")
+                if(possiblePlayoffTiles == _newcommand || letters == "")
+                {
+                    Console.Write("Enter your tiles: ");
+                    letters = Console.ReadLine();
+                    continue;
+                }
+
+                if(possiblePlayoffTiles == _quitcommand)
                     Environment.Exit(0);
 
                 char[] tiles = (letters.ToLower() + possiblePlayoffTiles.ToLower()).ToCharArray();
@@ -153,6 +162,36 @@ namespace WWFHelper
                 Console.WriteLine("Words with Multiple Playoff Tiles:");
                 Console.WriteLine(String.Join("\n", wordsWithMultiplePlayoffTiles));
             }
+        }
+
+        public static string GetTiles()
+        {
+            Console.Write("Enter your Tiles: ");
+            string toReturn = Console.ReadLine();
+            
+            foreach (char letter in toReturn)
+                if (!Char.IsLetter(letter))
+                {
+                    Console.WriteLine("Char: '" + letter + "' is not a letter");
+                    return GetTiles();
+                }
+
+            return toReturn;
+        }
+
+        public static string GetPossiblePlayoffTiles()
+        {
+            Console.Write("Enter Possible Playoff Tiles: ");
+            string toReturn = Console.ReadLine();
+
+            foreach (char letter in toReturn)
+                if (!Char.IsLetter(letter))
+                {
+                    Console.WriteLine("Char: '" + letter + "' is not a letter");
+                    return GetTiles();
+                }
+
+            return toReturn;
         }
     }
 }

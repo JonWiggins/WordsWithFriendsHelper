@@ -15,8 +15,7 @@ namespace WWF
         {
             WordComparer comparer = new WordComparer();
 
-            HashSet<Word> accepted = new HashSet<Word>(comparer);
-            HashSet<Word> rejected = new HashSet<Word>(comparer);
+            HashSet<Word> AnagramSet = new HashSet<Word>(comparer);
 
             foreach (string word in Words)
             {
@@ -30,25 +29,10 @@ namespace WWF
                 newWord.Hash = hash;
                 newWord.origin = word;
 
-                if (rejected.Contains(newWord))
-                {
-                    continue;
-                }
-                else
-                {
-                    if (accepted.Contains(newWord))
-                    {
-                        accepted.Remove(newWord);
-                        rejected.Add(newWord);
-                    }
-                    else
-                    {
-                        accepted.Add(newWord);
-                    }
-                }
+                AnagramSet.Add(newWord);
             }
 
-            return accepted;
+            return AnagramSet;
         }
         public class Word
         {
